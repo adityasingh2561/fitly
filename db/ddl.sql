@@ -1,0 +1,41 @@
+create database fitly;
+
+CREATE USER 'fitly' IDENTIFIED BY 'XXXXXXX';
+
+grant all on fitly.* to fitly;
+
+CREATE TABLE users (ID INT NOT NULL AUTO_INCREMENT PRIMARY KEY, username VARCHAR(60), password VARCHAR(60), secretword1 VARCHAR(60), secretword2 VARCHAR(60) );
+
+CREATE TABLE roles (ID INT NOT NULL AUTO_INCREMENT PRIMARY KEY, name VARCHAR(60), type VARCHAR(60));
+
+CREATE TABLE userroles (ID INT NOT NULL AUTO_INCREMENT PRIMARY KEY, userid INT, roleid INT, description VARCHAR(100) );
+
+CREATE TABLE log (ID INT NOT NULL AUTO_INCREMENT PRIMARY KEY, userid INT, timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP, logentry TEXT );
+
+CREATE TABLE authtickets (ID INT NOT NULL AUTO_INCREMENT PRIMARY KEY, userid INT, ticket VARCHAR(500), expires TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
+
+CREATE TABLE userinfobasic (ID INT NOT NULL AUTO_INCREMENT PRIMARY KEY, 
+userid INT,
+address1 VARCHAR(60),
+address2 VARCHAR(60), 
+city VARCHAR(60),
+state VARCHAR(2),
+zip VARCHAR(5),
+phone VARCHAR(10),
+email VARCHAR(100),
+cellphone VARCHAR(10),
+pic BLOB,
+introduction TEXT,
+firstname VARCHAR(100),
+lastname VARCHAR(100),
+gender VARCHAR(2),
+weight INT,
+height INT,
+medicalhistory TEXT
+);
+
+CREATE TABLE usersecrets (ID INT NOT NULL AUTO_INCREMENT PRIMARY KEY, userid INT, cc VARCHAR(18), ccexpires DATETIME, securitycode VARCHAR(10) );
+
+CREATE TABLE loggedon (ID INT NOT NULL AUTO_INCREMENT PRIMARY KEY, userid INT, onlinesince DATETIME );
+
+CREATE TABLE links (ID INT NOT NULL AUTO_INCREMENT PRIMARY KEY, userid INT, linkeduser INT, status VARCHAR(10) );
