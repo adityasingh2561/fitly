@@ -42,8 +42,7 @@ class Encryption {
 	}
 
 	public function hash($value) {
-		 $token = uniqid($salt, true);;
-		 return md5($token.$value);
+		 return md5($this->salt.$value);
 	}
 	
 	public function getToken() {
