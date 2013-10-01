@@ -1,0 +1,4 @@
+/bin
+/dist
+*.ignore
+/server/nbproject/private/
