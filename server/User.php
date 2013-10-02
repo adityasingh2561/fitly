@@ -4,6 +4,8 @@ include_once 'config.php';
 include_once 'Encryption.php';
 include_once 'UserInfo.php';
 include_once 'UserSecrets.php';
+include_once 'UserRole.php';
+include_once 'Role.php';
 class User {
 	public $id;
 	public $username;
@@ -12,13 +14,16 @@ class User {
 	public $secretword2;
 	public $userInfo;
 	public $userSecrets;
+	public $roles;
 	private $config;
 	private $enc;
+	
 	function __construct() {
-		$this->userInfo = new UserInfo();
 		$this->userSecrets = new UserSecrets();
 		$this->config = new config();
 		$this->enc = new Encryption();
+		$this->userInfo = new UserInfo();
+		$this->roles = new ArrayObject();
 		//$this->config->debugDump();
 	}
 	
@@ -33,11 +38,13 @@ class User {
 			$this->password = $row["password"];
 			$this->secretword1 = $row["secretword1"];
 			$this->secretword2 = $row["secretword2"];
+			mysql_close();
+			$this->userInfo->loadByUserId(trim(mysql_real_escape_string($id)));
 			return true;
 		} else {
 			return false;
 		}
-		mysql_close();
+		
 	}
 	
 	public function loadByUserName($username) {
@@ -47,15 +54,18 @@ class User {
 		$result = mysql_query($sql);
 		if ( mysql_num_rows($result) > 0) {
 			$row = mysql_fetch_array($result);
+			$this->id = $row["ID"];
 			$this->username = $row["username"];
 			$this->password = $row["password"];
 			$this->secretword1 = $row["secretword1"];
 			$this->secretword2 = $row["secretword2"];
+			mysql_close();
+			$this->userInfo->loadByUserId(trim(mysql_real_escape_string($this->id)));
 			return true;
 		} else {
 			return false;
 		}
-		mysql_close();
+		
 	}
 	
 	public function addOrUpdate($username, $password, $secretword1, $secretword2) {
@@ -82,6 +92,21 @@ class User {
 		mysql_close();
 		// reload
 		$this->loadByUserName($username);
+	}
+	
+	private function loadRoles() {
+		$sql = "select * from userroles where userid=" . $this->id;
+		mysql_connect($this->config->db_host, $this->config->db_user, $this->config->db_password) or die(mysql_error()); 
+		mysql_select_db($this->config->db_name) or die(mysql_error());
+		$result = mysql_query($sql);
+		while ($row = mysql_fetch_assoc($result)) {
+			$r = new UserRole();
+			$r->userid = $row["userid"];
+			$r->roleid = $row["roleid"];
+			$r->description = $row["description"];
+			$this->roles->append($r);
+		}
+		mysql_close();
 	}
 	
 	public function deleteById($id) {
@@ -128,6 +153,7 @@ class User {
 		Print "password=" . $this->password . "\n";
 		Print "secretword1=" . $this->secretword1 . "\n";
 		Print "secretword2=" . $this->secretword2 . "\n";
+		$this->userInfo->debugDump();
 	}
 }
 ?>
