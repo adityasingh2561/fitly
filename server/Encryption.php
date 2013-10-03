@@ -46,7 +46,7 @@ class Encryption {
 	}
 	
 	public function getToken() {
-		return uniqid($salt, true);
+		return uniqid(true);
 	}
 }
 

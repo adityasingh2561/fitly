@@ -32,10 +32,14 @@ if ($user->loadById(1)) {
 if ($user->loadByUserName("AdityaS")) {
 	Print "User Loaded By Name\n";
 	$user->debugDump();
-	$user->addOrUpdate("AdityaS", "passing", $user->secretword1, $user->secretword2);
-	$user->debugDump();
-	if ($user->Login("AdityaS", "passing")) {
-		Print "Login successful\n";
+	//$user->addOrUpdate("AdityaS", "passing", $user->secretword1, $user->secretword2);
+	
+	//$tik = $user->Login("AdityaS", "passing");
+	//if ($tik !== false) {
+		//Print "Login successful. Ticket = ". $user->debugDump() ."\n";
+	//}
+	if ($user->authtoken->isValid()) {
+		Print "\ntoken is valid\n";
 	}
 }
 

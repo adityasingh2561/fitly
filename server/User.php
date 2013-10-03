@@ -6,6 +6,7 @@ include_once 'UserInfo.php';
 include_once 'UserSecrets.php';
 include_once 'UserRole.php';
 include_once 'Role.php';
+include_once 'AuthTicket.php';
 class User {
 	public $id;
 	public $username;
@@ -15,6 +16,7 @@ class User {
 	public $userInfo;
 	public $userSecrets;
 	public $roles;
+	public $authtoken;
 	private $config;
 	private $enc;
 	
@@ -24,6 +26,8 @@ class User {
 		$this->enc = new Encryption();
 		$this->userInfo = new UserInfo();
 		$this->roles = new ArrayObject();
+		$this->authtoken = new AuthTicket();
+		
 		//$this->config->debugDump();
 	}
 	
@@ -34,12 +38,15 @@ class User {
 		$result = mysql_query($sql);
 		if ( mysql_num_rows($result) > 0) {
 			$row = mysql_fetch_array($result);
+			$this->id = $row["ID"];
 			$this->username = $row["username"];
 			$this->password = $row["password"];
 			$this->secretword1 = $row["secretword1"];
 			$this->secretword2 = $row["secretword2"];
 			mysql_close();
 			$this->userInfo->loadByUserId(trim(mysql_real_escape_string($id)));
+			$this->authtoken->userid = $this->id;
+			$this->authtoken->loadByUserId();
 			return true;
 		} else {
 			return false;
@@ -61,6 +68,8 @@ class User {
 			$this->secretword2 = $row["secretword2"];
 			mysql_close();
 			$this->userInfo->loadByUserId(trim(mysql_real_escape_string($this->id)));
+			$this->authtoken->userid = $this->id;
+			$this->authtoken->loadByUserId();
 			return true;
 		} else {
 			return false;
@@ -116,15 +125,39 @@ class User {
 	public function isLoggedIn() {
 		
 	}
+
+	public function isAuthticketValid() {
+		if (empty($this->authtoken) || trim($this->authtoken) === "") {
+			return false;
+		} else {
+			$tik = new AuthTicket();
+			$tik->userid = $this->id;
+			if ($tik->load()) {
+				if ($tik->isValid()) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 	
 	public function Login($username, $password) {
 		$password = trim(mysql_real_escape_string($password));
 		//Print "Login: Password=" . $password . "\n";
 		//Print "Hash=" . $this->enc->hash($password) . "\n";
-		
+		if (!empty($this->authtoken)) {
+			if ($this->authtoken->isValid()) {
+				return true;
+			}
+		} else {
+			//Print "No ticket\n";
+		}
 		if ($this->loadByUserName($username)) {
-			//Print "Password in DB=" . $this->password ."\n";
+			Print "Password in DB=" . $this->password ."\n";
 			if ($this->enc->hash($password) === $this->password) {
+				$this->authtoken->userid = $this->id;
+				$this->authtoken->delete();
+				$this->authtoken->create();
 				return true;
 			} else {
 				return false;
@@ -140,19 +173,14 @@ class User {
 		
 	}
 	
-	public function getToken() {
-		
-	}
 	
-	public function deleteToken() {
-		
-	}
 	
 	public function debugDump() {
 		Print "username=" . $this->username . "\n";
 		Print "password=" . $this->password . "\n";
 		Print "secretword1=" . $this->secretword1 . "\n";
 		Print "secretword2=" . $this->secretword2 . "\n";
+		$this->authtoken->debugDump();
 		$this->userInfo->debugDump();
 	}
 }

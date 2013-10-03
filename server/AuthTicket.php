@@ -29,7 +29,7 @@ class AuthTicket {
 		if ( mysql_num_rows($result) > 0) {
 			$row = mysql_fetch_array($result);
 			$this->ticket = $row["ticket"];
-			$this->expires = date('m/d/Y', $row["expires"]);
+			$this->expires = date('m/d/Y H:i:s', strtotime($row["expires"]));
 			mysql_close();
 			return true;
 		} else {
@@ -39,17 +39,19 @@ class AuthTicket {
 	
 	public function load() {
 		if (empty($this->ticket) || trim($this->ticket) === "") {
+			Print "No ticket\n";
 			return false;
+
 		}
 		$sql = "select * from authtickets where ticket=" . mysql_real_escape_string($this->ticket);
 		mysql_connect($this->config->db_host, $this->config->db_user, $this->config->db_password) or die(mysql_error()); 
 		mysql_select_db($this->config->db_name) or die(mysql_error());
 		$result = mysql_query($sql);
-		if ( mysql_num_rows($result) > 0) {
+		if ( $result !== false) {
 			$row = mysql_fetch_array($result);
 			$this->userid = $row["userid"];
 			$this->ticket = $row["ticket"];
-			$this->expires = date('m/d/Y', $row["expires"]);
+			$this->expires = date('m/d/Y H:i:s', strtotime($row["expires"]));
 			mysql_close();
 			return true;
 		} else {
@@ -62,15 +64,19 @@ class AuthTicket {
 		if (empty($this->userid) || trim($this->userid) === "") {
 			return false;
 		}
-		$now = new DateTime();
+		$now = date('m/d/Y H:m:s');
 		if (!empty($this->expires) && $this->expires !== "") {
+			//Print "Now =" . $now;
+			Print "Expires =" . $this->expires;
 			if ($now <= $this->expires) {
+				//Print "Token has not expired\n";
 				return true;
 			} else {
-				delete();
+				//Print "Token is not valid\n";
+				return false;
 			}
 		}
-		return false;
+		//Print "Date Time checks failed\n";
 	}
 	public function delete() {
 		if (empty($this->userid) || trim($this->userid) === "") {
@@ -87,19 +93,31 @@ class AuthTicket {
 	public function create() {
 		if (empty($this->userid) || trim($this->userid) === "") {
 			return false;
+			Print "No user Id\n";
 		}
 		$ticket = $this->enc->getToken();
-		$expires = date_add("today +12 hours");
-		$mysqldate = date("m/d/y g:i A", $expires);
+		$this->ticket = $ticket;
+		Print "Token = " . $ticket . "\n";
+		$now = new DateTime();
+		$expires = date_add($now,new DateInterval("PT12H"));
+		$mysqldate = $expires->format("Y-m-d H:i:s");
 		$sql = "insert into authtickets (userid, ticket,expires) values (";
-		$sql .= $this->userid . ",'";
-		$sql .= "'" . $ticket ."','";
+		$sql .= $this->userid . ",";
+		$sql .= "'" . $ticket ."',";
 		$sql .= "'" . $mysqldate ."')";
 		mysql_connect($this->config->db_host, $this->config->db_user, $this->config->db_password) or die(mysql_error()); 
 		mysql_select_db($this->config->db_name) or die(mysql_error());
+		//Print "SQL = " . $sql . "\n";
 		$result = mysql_query($sql);
 		mysql_close();
+		//Print "Auth ticket created\n";
+		$this->load();
 		return true;
+	}
+	
+	public function debugDump() {
+		Print "Ticket=" . $this->ticket."\n";
+		Print "Expires=" . $this->expires ."\n";
 	}
 }
 
