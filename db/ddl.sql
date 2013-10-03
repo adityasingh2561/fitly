@@ -31,6 +31,8 @@ lastname VARCHAR(100),
 gender VARCHAR(2),
 weight INT,
 height INT,
+age INT,
+dob TIMESTAMP,
 medicalhistory TEXT
 );
 
