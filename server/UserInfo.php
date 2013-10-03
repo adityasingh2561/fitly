@@ -20,6 +20,8 @@ class UserInfo {
 	public $weight;         
 	public $height;         
 	public $medicalhistory;
+	public $age;
+	public $dob;
 	private $config;
 
 	function __construct() {
@@ -57,6 +59,8 @@ class UserInfo {
 			$this->weight = $row["weight"];
 			$this->height = $row["height"];
 			$this->medicalhistory = $row["medicalhistory"];
+			$this->age = $row["age"];
+			$this->dob = date('m/d/Y H:i:s', strtotime($row["dob"]));
 			return true;
 		} else {
 			return false;
@@ -73,7 +77,7 @@ class UserInfo {
 		mysql_select_db($this->config->db_name) or die(mysql_error());
 		$sql = "delete from userinfobasic where userid=" . trim(mysql_real_escape_string($this->userid));
 		$result = mysql_query($sql);
-		$sql = "insert into userinfo (userid,address1,address2,city,state,zip,phone,email,cellphone,pic,introduction,firstname,lastname,gender,weight,height,medicalhistory) values (";
+		$sql = "insert into userinfo (userid,address1,address2,city,state,zip,phone,email,cellphone,pic,introduction,firstname,lastname,gender,weight,height,age,dob,medicalhistory) values (";
 		$sql .= trim(mysql_real_escape_string($this->userid)) . ",";
 		$sql .= "'" . trim(mysql_real_escape_string($this->address1)) ."',";
 		$sql .= "'" . trim(mysql_real_escape_string($this->address2)) ."',";
@@ -90,6 +94,8 @@ class UserInfo {
 		$sql .= "'" . trim(mysql_real_escape_string($this->gender)) ."',";
 		$sql .= trim(mysql_real_escape_string($this->weight)) .",";
 		$sql .= trim(mysql_real_escape_string($this->height)) .",";
+		$sql .= trim(mysql_real_escape_string($this->age)) .",";
+		$sql .= "'".trim(mysql_real_escape_string(date('Y-m-d H:i:s', strtotime($this->dob)))) ."',";
 		$sql .= "'" . trim(mysql_real_escape_string($this->medicalhistory)) ."'";
 		$sql .= " ) ";
 		$result = mysql_query($sql);
@@ -111,24 +117,29 @@ class UserInfo {
 	}
 	
 	public function debugDump() {
-		$dump = "";
-		$dump .= "Address1= " . $this->address1 .",";
-		$dump .= "Address2= " . $this->address2 .",";
-		$dump .= "City= " . $this->city .",";
-		$dump .= "State= " . $this->state .",";
-		$dump .= "Zip= " . $this->zip .",";
-		$dump .= "Phone= " . $this->phone .",";
-		$dump .= "Email= " . $this->email .",";
-		$dump .= "Cellphone= " . $this->cellphone .",";
-		$dump .= "Pic= " . $this->pic .",";
-		$dump .= "Intro= " . $this->introduction .",";
-		$dump .= "FirstName= " . $this->firstname .",";
-		$dump .= "LastName= " . $this->lastname .",";
-		$dump .= "Gender= " . $this->gender .",";
-		$dump .= "Wt= ".$this->weight .",";
-		$dump .= "Ht= ".$this->height .",";
-		$dump .= "Med Hist= " . $this->medicalhistory ."\n";
-		Print $dump;
+		$dump = $this->getDataArray();
+		Print json_encode($dump);
+	}
+	
+	public function getDataArray() {
+		$dump = array();
+		$dump["Address1"] = $this->address1;
+		$dump["Address2"] = $this->address2;
+		$dump["city"] = $this->city;
+		$dump["state"] = $this->state;
+		$dump["zip"] = $this->zip;
+		$dump["phone"] = $this->phone;
+		$dump["email"] = $this->email;
+		$dump["cellphone"] = $this->cellphone;
+		$dump["pic"] = $this->pic;
+		$dump["introduction"] = $this->introduction;
+		$dump["firstname"] = $this->firstname;
+		$dump["lastname"] = $this->lastname;
+		$dump["gender"] = $this->gender;
+		$dump["weight"] = $this->weight;
+		$dump["height"] = $this->height;
+		$dump["medicalhistory"] = $this->medicalhistory;
+		return $dump;
 	}
 }
 ?>

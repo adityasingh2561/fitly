@@ -36,6 +36,9 @@ class config {
 		Print "db_user=". $this->db_user . "\n";
 		Print "db_password=". $this->db_password . "\n";
 	}
+	public function getUploadLocation() {
+		return "./upload";
+	}
 }
 
 ?>

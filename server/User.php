@@ -173,15 +173,21 @@ class User {
 		
 	}
 	
-	
+	public function getDataArray() {
+		$dump = array();
+		$dump["userid"]= $this->id;
+		$dump["username"] = $this->username;
+		$dump["passwordhash"] = $this->password;
+		$dump["secretword1hash"] = $this->secretword1;
+		$dump["secretword2hash"] = $this->secretword2;
+		$userInfoDump = $this->userInfo->getDataArray();
+		$authTokenDump = $this->authtoken->getDataArray();
+		return array_merge($dump,$userInfoDump,$authTokenDump);
+		
+	}
 	
 	public function debugDump() {
-		Print "username=" . $this->username . "\n";
-		Print "password=" . $this->password . "\n";
-		Print "secretword1=" . $this->secretword1 . "\n";
-		Print "secretword2=" . $this->secretword2 . "\n";
-		$this->authtoken->debugDump();
-		$this->userInfo->debugDump();
+		Print json_encode($this->getDataArray()) . "\n";
 	}
 }
 ?>

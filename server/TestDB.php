@@ -42,5 +42,7 @@ if ($user->loadByUserName("AdityaS")) {
 		Print "\ntoken is valid\n";
 	}
 }
-
+$response = array();
+$response["Name"] = "Value";
+Print json_encode($response);
 ?>

@@ -116,8 +116,14 @@ class AuthTicket {
 	}
 	
 	public function debugDump() {
-		Print "Ticket=" . $this->ticket."\n";
-		Print "Expires=" . $this->expires ."\n";
+		Print json_encode($this->getDataArray()) . "\n";
+	}
+	
+	public function getDataArray() {
+		$dump = array();
+		$dump["ticket"] = $this->ticket;
+		$dump["expires"] = $this->expires;
+		return $dump;
 	}
 }
 
